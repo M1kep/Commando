@@ -321,13 +321,14 @@ class CommandRegistry {
 	 * @param {boolean} [types.message=true] - Whether to register the built-in message type
 	 * @param {boolean} [types.command=true] - Whether to register the built-in command type
 	 * @param {boolean} [types.group=true] - Whether to register the built-in group type
+	 * @param {boolean} [types.guild=true] - Whether to register the built-in guild type
 	 * @return {CommandRegistry}
 	 */
 	registerDefaultTypes(types = {}) {
 		types = {
 			string: true, integer: true, float: true, boolean: true,
 			user: true, member: true, role: true, channel: true, message: true,
-			command: true, group: true,
+			command: true, group: true, guild: true,
 			...types
 		};
 		if(types.string) this.registerType(require('./types/string'));
@@ -341,6 +342,7 @@ class CommandRegistry {
 		if(types.message) this.registerType(require('./types/message'));
 		if(types.command) this.registerType(require('./types/command'));
 		if(types.group) this.registerType(require('./types/group'));
+		if(types.guild) this.registerType(require('./types/guild'));
 		return this;
 	}
 
