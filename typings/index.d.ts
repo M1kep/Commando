@@ -441,7 +441,6 @@ declare module 'discord.js-commando' {
 		infinite?: boolean;
 		validate?: Function;
 		parse?: Function;
-		isEmpty?: Function;
 		wait?: number;
 	};
 
