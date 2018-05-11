@@ -3,9 +3,15 @@ declare module 'sqlite' {
 	export interface Statement {}
 }
 
+declare module 'syncsqlite' {
+	export interface Database {}
+	export interface Statement {}
+}
+
 declare module 'discord.js-commando' {
-	import { Channel, Client, ClientOptions, ClientUserSettings, Collection, DMChannel, Emoji, GroupDMChannel, Guild, GuildChannel, GuildMember, GuildResolvable, Message, MessageAttachment, MessageEmbed, MessageMentions, MessageOptions, MessageReaction, PermissionResolvable, ReactionEmoji, Role, Snowflake, StringResolvable, TextChannel, User, UserResolvable, Webhook } from 'discord.js';
+	import { Channel, Client, ClientOptions, ClientUserSettings, Collection, DMChannel, Emoji, GroupDMChannel, Guild, GuildChannel, GuildMember, GuildResolvable, Message, MessageAttachment, MessageEmbed, MessageMentions, MessageOptions, MessageReaction, PermissionResolvable, PermissionString, ReactionEmoji, Role, Snowflake, StringResolvable, TextChannel, User, UserResolvable, Webhook } from 'discord.js';
 	import { Database as SQLiteDatabase, Statement as SQLiteStatement } from 'sqlite';
+	import { Database as SyncSQLiteDatabase, Statement as SyncSQLiteStatement} from 'better-sqlite3';
 
 	export class Argument {
 		private constructor(client: CommandoClient, info: ArgumentInfo);
@@ -281,6 +287,8 @@ declare module 'discord.js-commando' {
 		on(event: 'warn', listener: (info: string) => void): this;
 	}
 
+	export { CommandoClient as Client };
+
 	export class CommandoGuild extends Guild {
 		private _commandPrefix: string;
 		private _commandsEnabled: object;
@@ -310,18 +318,18 @@ declare module 'discord.js-commando' {
 		public findCommands(searchString?: string, exact?: boolean, message?: Message | CommandMessage): Command[];
 		public findGroups(searchString?: string, exact?: boolean): CommandGroup[];
 		public registerCommand(command: Command | Function): CommandRegistry;
-		public registerCommands(commands: Command[] | Function[]): CommandRegistry;
+		public registerCommands(commands: Command[] | Function[], ignoreInvalid?: boolean): CommandRegistry;
 		public registerCommandsIn(options: string | {}): CommandRegistry;
-		public registerDefaultCommands(options?: { help?: boolean, prefix?: boolean, eval_?: boolean, ping?: boolean, commandState?: boolean }): CommandRegistry;
+		public registerDefaultCommands(commands?: { help?: boolean, prefix?: boolean, eval?: boolean, ping?: boolean, commandState?: boolean }): CommandRegistry;
 		public registerDefaultGroups(): CommandRegistry;
 		public registerDefaults(): CommandRegistry;
-		public registerDefaultTypes(): CommandRegistry;
+		public registerDefaultTypes(types?: { string?: boolean, integer?: boolean, float?: boolean, boolean?: boolean, user?: boolean, member?: boolean, role?: boolean, channel?: boolean, message?: boolean, command?: boolean, group?: boolean }): CommandRegistry;
 		public registerEvalObject(key: string, obj: {}): CommandRegistry;
 		public registerEvalObjects(obj: {}): CommandRegistry;
-		public registerGroup(group: CommandGroup | Function | string[] | string, name?: string): CommandRegistry;
-		public registerGroups(groups: CommandGroup[] | Function[] | string[][]): CommandRegistry;
+		public registerGroup(group: CommandGroup | Function | { id: string, name?: string, guarded?: boolean } | string, name?: string, guarded?: boolean): CommandRegistry;
+		public registerGroups(groups: CommandGroup[] | Function[] | { id: string, name?: string, guarded?: boolean }[] | string[][]): CommandRegistry;
 		public registerType(type: ArgumentType | Function): CommandRegistry;
-		public registerTypes(type: ArgumentType[] | Function[]): CommandRegistry;
+		public registerTypes(type: ArgumentType[] | Function[], ignoreInvalid?: boolean): CommandRegistry;
 		public registerTypesIn(options: string | {}): CommandRegistry;
 		public reregisterCommand(command: Command | Function, oldCommand: Command): void;
 		public resolveCommand(command: CommandResolvable): Command;
@@ -350,7 +358,7 @@ declare module 'discord.js-commando' {
 		public clear(guild: Guild | string): Promise<void>;
 		public destroy(): Promise<void>;
 		public get(guild: Guild | string, key: string, defVal?: any): any;
-		public getGuildID(guild: Guild | string): string;
+		public static getGuildID(guild: Guild | string): string;
 		public init(client: CommandoClient): Promise<void>;
 		public remove(guild: Guild | string, key: string): Promise<any>;
 		public set(guild: Guild | string, key: string, val: any): Promise<any>;
@@ -378,6 +386,41 @@ declare module 'discord.js-commando' {
 		private updateOtherShards(key: string, val: any): void;
 	}
 
+	export class SyncSQLiteProvider extends SettingProvider {
+		public constructor(db: SyncSQLiteDatabase);
+
+		public readonly client: CommandoClient;
+		public db: SyncSQLiteDatabase;
+		private deleteStmt: SyncSQLiteStatement;
+		private insertOrReplaceStmt: SyncSQLiteStatement
+		private listeners: Map<any, any>;
+		private settings: Map<any, any>;
+
+		public clear(guild: Guild | string): Promise<void>;
+		public destroy(): Promise<void>;
+		public get(guild: Guild | string, key: string, defVal?: any): any;
+		public init(client: CommandoClient): Promise<void>;
+		public remove(guild: Guild | string, key: string): Promise<any>;
+		public set(guild: Guild | string, key: string, val: any): Promise<any>;
+		private setupGuild(guild: string, settings: {}): void;
+		private setupGuildCommand(guild: CommandoGuild, command: Command, settings: {}): void;
+		private setupGuildGroup(guild: CommandoGuild, group: CommandGroup, settings: {}): void;
+		private updateOtherShards(key: string, val: any): void;
+	}
+
+	export class util {
+		public static disambiguation(items: any[], label: string, property?: string): string;
+		public static paginate<T>(items: T[], page?: number, pageLength?: number): {
+			items: T[],
+			page: number,
+			maxPage: number,
+			pageLength: number
+		};
+		public static readonly permissions: { [K in PermissionString]: string };
+	}
+
+	export const version: string;
+
 	type ArgumentCollectorResult = {
 		values?: object;
 		cancelled?: 'user' | 'time' | 'promptLimit';
@@ -398,6 +441,7 @@ declare module 'discord.js-commando' {
 		infinite?: boolean;
 		validate?: Function;
 		parse?: Function;
+		isEmpty?: Function;
 		wait?: number;
 	};
 
