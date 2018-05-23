@@ -24,11 +24,11 @@ module.exports = class PingCommand extends Command {
 				${this.client.ping ? `The heartbeat ping is ${Math.round(this.client.ping)}ms.` : ''}
 			`);
 		} else {
-			await msg.edit('Pinging...');
-			return msg.edit(oneLine`
-				Pong! The message round-trip took ${msg.editedTimestamp - msg.createdTimestamp}ms.
-				${this.client.ping ? `The heartbeat ping is ${Math.round(this.client.ping)}ms.` : ''}
-			`);
+			const reply = await msg.edit('Pinging...');
+			return reply.edit(oneLine`
+                Pong! The message round-trip took ${reply.editedTimestamp - reply.createdTimestamp}ms.
+                ${this.client.ping ? `The heartbeat ping is ${Math.round(this.client.ping)}ms.` : ''}
+            `);
 		}
 	}
 };
