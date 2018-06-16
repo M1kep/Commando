@@ -1,4 +1,4 @@
-const discord = require('discord.js');
+const { splitMessage } = require('discord.js');
 const {	stripIndents, oneLine } = require('common-tags');
 const Command = require('../base');
 const { disambiguation } = require('../../util');
@@ -84,7 +84,7 @@ module.exports = class HelpCommand extends Command {
 		} else {
 			const messages = [];
 			try {
-				const splitTotal = discord.util.splitMessage(stripIndents`
+				const body = stripIndents`
 				${oneLine`
 					To run a command in ${msg.guild || 'any server'},
 					use ${Command.usage('command', msg.guild ? msg.guild.commandPrefix : null, this.client.user)}.
@@ -103,13 +103,21 @@ module.exports = class HelpCommand extends Command {
 							.map(cmd => `**${cmd.name}:** ${cmd.description}${cmd.nsfw ? ' (NSFW)' : ''}`).join('\n')
 						}
 					`).join('\n\n')
-				}
-			`);
+				}`;
 
-				for(const part in splitTotal) {
+				if(body.length >= 2000) {
+					const splitContent = splitMessage(body);
+
+					for(const part in splitContent) {
+						messages.push(await msg.embed({ // eslint-disable-line no-await-in-loop
+							color: msg.guild ? msg.member.displayColor : 16711749,
+							description: splitContent[part]
+						}));
+					}
+				} else {
 					messages.push(await msg.embed({ // eslint-disable-line no-await-in-loop
 						color: msg.guild ? msg.member.displayColor : 16711749,
-						description: splitTotal[part]
+						description: body
 					}));
 				}
 			} catch(err) {
