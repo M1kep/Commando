@@ -1,6 +1,6 @@
 {
 	"name": "discord.js-commando",
-	"version": "1.1.5-ribbon",
+	"version": "1.1.6-ribbon",
 	"description": "The official command framework for Discord.js",
 	"license": "Apache-2.0",
 	"author": "Schuyler Cebulskie <Gawdl3y@gawdl3y.com> (https://gawdl3y.com/)",
@@ -38,7 +38,7 @@
 	},
 	"peerDependencies": {
 		"better-sqlite3": "4.0.0",
-		"discord.js": "12.0.1-main"
+		"discord.js": "12.0.2-main"
 	},
 	"engines": {
 		"node": ">=8.6.0"
