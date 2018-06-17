@@ -138,7 +138,8 @@ class CommandMessage {
 			return this.reply(`The \`${this.command.name}\` command must be used in a server channel.`);
 		}
 
-		if(this.command.nsfw && !this.message.channel.nsfw) {
+		if(this.command.nsfw && !this.message.channel.nsfw &&
+			(this.message.channel.type === 'text' || this.message.channel.type === 'unknown')) {
 			this.client.emit('commandBlocked', this, 'nsfw');
 			return this.reply(`The \`${this.command.name}\` command can only be used in NSFW channels.`);
 		}
